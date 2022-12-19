@@ -16,12 +16,12 @@ script_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 spinner = Halo(text='', spinner='dots')
 
-def main(output_dir=None):
+def main(output_dir=None, recreate=False):
 
     db_dir = Path('db')
 
     yahoo = Yahoo()
-    yahoo.download_data(db_dir)
+    yahoo.download_data(db_dir, recreate=recreate)
 
     features_generators = [
         RSI(num_days=5, interval=14, variable='adj_close'),
@@ -61,7 +61,8 @@ if is_vscode: sys.argv = ['']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Signals example data pipeline')
     parser.add_argument('--output_dir', default=os.path.join(script_dir, 'data'))
+    parser.add_argument('--recreate', action='store_true')
 
     args = parser.parse_args()
-    main(args.output_dir)
+    main(args.output_dir, recreate=args.recreate)
 # %%
