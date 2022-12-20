@@ -39,16 +39,16 @@ def main(output_dir=None, recreate=False):
     training_data_output_path = 'example_training_data_yahoo.csv'
     tournament_data_output_path = 'tournament_data_yahoo.csv'
 
-    train['friday_date'] = pd.to_datetime(train['friday_date'], format='%Y%m%d')
-    test['friday_date'] = pd.to_datetime(test['friday_date'], format='%Y%m%d')
-
     if output_dir is not None:
         os.makedirs(output_dir, exist_ok=True)
         training_data_output_path = f'{output_dir}/example_training_data_yahoo.csv'
         tournament_data_output_path = f'{output_dir}/example_tournament_data_yahoo.csv'
 
+    train['friday_date'] = pd.to_datetime(train['friday_date'], format='%Y%m%d')
     train.to_csv(training_data_output_path)
+    
     tournament_data = pd.concat([test, live])
+    tournament_data['friday_date'] = pd.to_datetime(tournament_data['friday_date'], format='%Y%m%d')
     tournament_data.to_csv(tournament_data_output_path)
 
     spinner.succeed()
