@@ -16,7 +16,9 @@ script_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 spinner = Halo(text='', spinner='dots')
 
-def main(output_dir=None, recreate=False):
+def main(output_dir=None, friday_date=None, recreate=False):
+    if friday_date is not None:
+        friday_date = pd.Timestamp(friday_date).to_pydatetime()
 
     db_dir = Path('db')
 
@@ -34,7 +36,8 @@ def main(output_dir=None, recreate=False):
 
     train, test, live, feature_names = yahoo.get_data(db_dir,
                                                       features_generators=features_generators,
-                                                      feature_prefix='feature')
+                                                      feature_prefix='feature',
+                                                      last_friday=friday_date)
 
     training_data_output_path = 'example_training_data_yahoo.csv'
     tournament_data_output_path = 'tournament_data_yahoo.csv'
@@ -62,7 +65,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Signals example data pipeline')
     parser.add_argument('--output_dir', default=os.path.join(script_dir, 'data'))
     parser.add_argument('--recreate', action='store_true')
+    parser.add_argument('--friday-date', default=None)
 
     args = parser.parse_args()
-    main(args.output_dir, recreate=args.recreate)
+    if args.friday_date is None or len(args.friday_date) == 0:
+        args.friday_date = os.environ['FRIDAY_DATE'] if 'FRIDAY_DATE' in os.environ else None
+    if args.friday_date is not None:
+        print(f'Open Signals Overriding Friday Date to {args.friday_date}')
+
+    main(args.output_dir, friday_date=args.friday_date, recreate=args.recreate)
 # %%

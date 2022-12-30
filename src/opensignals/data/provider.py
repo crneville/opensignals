@@ -95,6 +95,8 @@ class Provider(ABC):
     def get_live_data(ticker_data: pd.DataFrame, last_friday: dt.date) -> pd.DataFrame:
         date_string = last_friday.strftime('%Y-%m-%d')
         live_data = ticker_data[ticker_data.date == date_string].copy()
+        # last_friday_data = ticker_data[ticker_data.date == date_string].copy()
+        # live_data = ticker_data[ticker_data.date >= date_string].copy()
 
         # get data from the day before, for markets that were closed
         last_thursday = last_friday - relativedelta(days=1)
@@ -104,6 +106,7 @@ class Provider(ABC):
         # Only select tickers than aren't already present in live_data
         thursday_data = thursday_data[
             ~thursday_data.bloomberg_ticker.isin(live_data.bloomberg_ticker.values)
+            # ~thursday_data.bloomberg_ticker.isin(last_friday_data.bloomberg_ticker.values)
         ].copy()
 
         live_data = pd.concat([live_data, thursday_data])
@@ -130,7 +133,7 @@ class Provider(ABC):
         # for training and testing we want clean, complete data only
         ml_data = ml_data.dropna(subset=feature_names)
         # ensure we have only fridays
-        ml_data = ml_data[ml_data.index.weekday == 4]
+        # ml_data = ml_data[ml_data.index.weekday == 4]
         # drop eras with under 50 observations per era
         ml_data = ml_data[ml_data.index.value_counts() > 50]
 
