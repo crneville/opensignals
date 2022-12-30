@@ -95,8 +95,6 @@ class Provider(ABC):
     def get_live_data(ticker_data: pd.DataFrame, last_friday: dt.date) -> pd.DataFrame:
         date_string = last_friday.strftime('%Y-%m-%d')
         live_data = ticker_data[ticker_data.date == date_string].copy()
-        # last_friday_data = ticker_data[ticker_data.date == date_string].copy()
-        # live_data = ticker_data[ticker_data.date >= date_string].copy()
 
         # get data from the day before, for markets that were closed
         last_thursday = last_friday - relativedelta(days=1)
@@ -106,7 +104,6 @@ class Provider(ABC):
         # Only select tickers than aren't already present in live_data
         thursday_data = thursday_data[
             ~thursday_data.bloomberg_ticker.isin(live_data.bloomberg_ticker.values)
-            # ~thursday_data.bloomberg_ticker.isin(last_friday_data.bloomberg_ticker.values)
         ].copy()
 
         live_data = pd.concat([live_data, thursday_data])
