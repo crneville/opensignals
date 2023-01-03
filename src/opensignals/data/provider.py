@@ -96,17 +96,31 @@ class Provider(ABC):
         date_string = last_friday.strftime('%Y-%m-%d')
         live_data = ticker_data[ticker_data.date == date_string].copy()
 
-        # get data from the day before, for markets that were closed
-        last_thursday = last_friday - relativedelta(days=1)
-        thursday_date_string = last_thursday.strftime('%Y-%m-%d')
-        thursday_data = ticker_data[ticker_data.date == thursday_date_string]
+        for dt in range(1, 7+1):
+            # get data from a previous day before, for markets that were closed
+            historical_day = last_friday - relativedelta(days=dt)
+            historical_date_string = historical_day.strftime('%Y-%m-%d')
+            historical_data = ticker_data[ticker_data.date == historical_date_string]
 
-        # Only select tickers than aren't already present in live_data
-        thursday_data = thursday_data[
-            ~thursday_data.bloomberg_ticker.isin(live_data.bloomberg_ticker.values)
-        ].copy()
+            # Only select tickers than aren't already present in live_data
+            historical_data = historical_data[
+                ~historical_data.bloomberg_ticker.isin(live_data.bloomberg_ticker.values)
+            ].copy()
 
-        live_data = pd.concat([live_data, thursday_data])
+            live_data = pd.concat([live_data, historical_data])
+
+        # # get data from the day before, for markets that were closed
+        # last_thursday = last_friday - relativedelta(days=1)
+        # thursday_date_string = last_thursday.strftime('%Y-%m-%d')
+        # thursday_data = ticker_data[ticker_data.date == thursday_date_string]
+
+        # # Only select tickers than aren't already present in live_data
+        # thursday_data = thursday_data[
+        #     ~thursday_data.bloomberg_ticker.isin(live_data.bloomberg_ticker.values)
+        # ].copy()
+
+        # live_data = pd.concat([live_data, thursday_data])
+        
         live_data = live_data.set_index('date')
         return live_data  # type: ignore
 
