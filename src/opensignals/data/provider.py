@@ -142,15 +142,21 @@ class Provider(ABC):
         ml_data = ml_data.set_index('date')
 
         # for training and testing we want clean, complete data only
-        ml_data = ml_data.dropna(subset=feature_names)
+        # ml_data = ml_data.dropna(subset=feature_names)
         # ensure we have only fridays
         # ml_data = ml_data[ml_data.index.weekday == 4]
         # drop eras with under 50 observations per era
         ml_data = ml_data[ml_data.index.value_counts() > 50]
 
         # train test split
-        train_data = ml_data[ml_data['data_type'] == 'train']
-        test_data = ml_data[ml_data['data_type'] == 'validation']
+        max_train_date = ml_data[ml_data['data_type'] == 'train'].index.max()
+        max_val_date = ml_data[ml_data['data_type'] == 'validation'].index.max()
+
+        # train_data = ml_data[ml_data['data_type'] == 'train']
+        # test_data = ml_data[ml_data['data_type'] == 'validation']
+
+        train_data = ml_data[ml_data.index <= max_train_date]
+        test_data = ml_data[ml_data.index > max_train_date]
         return train_data, test_data
 
     def get_data(self,
@@ -187,6 +193,10 @@ class Provider(ABC):
 
         # generate live data
         live_data = Provider.get_live_data(ticker_data, last_friday)
+
+        if pd.Timestamp(last_friday).dayofweek != 4:
+            real_last_friday = last_friday - relativedelta(weekday=FR(-1))
+            test_data = test_data[test_data.index <= real_last_friday]
 
         return train_data, test_data, live_data, feature_names
 

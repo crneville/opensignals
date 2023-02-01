@@ -44,17 +44,33 @@ def main(output_dir=None, friday_date=None, recreate=False):
 
     if output_dir is not None:
         os.makedirs(output_dir, exist_ok=True)
-        training_data_output_path = f'{output_dir}/example_training_data_yahoo.csv'
-        tournament_data_output_path = f'{output_dir}/example_tournament_data_yahoo.csv'
+    
+    training_data_output_path = f'{output_dir}/example_training_data_yahoo'
+    tournament_data_output_path = f'{output_dir}/example_tournament_data_yahoo'
 
     train['friday_date'] = pd.to_datetime(train['friday_date'], format='%Y%m%d')
-    train.to_csv(training_data_output_path)
-    
     tournament_data = pd.concat([test, live])
     tournament_data['friday_date'] = pd.to_datetime(tournament_data['friday_date'], format='%Y%m%d')
-    tournament_data.to_csv(tournament_data_output_path)
+    
+    train.to_csv(training_data_output_path + '.csv')
+    tournament_data.to_csv(tournament_data_output_path  + '.csv')
+
+    train = convert_columns(train, 'float64', 'float32')
+    train = convert_columns(train, 'float16', 'float32')
+    train = convert_columns(train, 'int64', 'int32')
+    tournament_data = convert_columns(tournament_data, 'float64', 'float32')
+    tournament_data = convert_columns(tournament_data, 'float16', 'float32')
+    tournament_data = convert_columns(tournament_data, 'int64', 'int32')
+
+    train.to_parquet(training_data_output_path  + '.parquet')
+    tournament_data.to_parquet(tournament_data_output_path + '.parquet')
 
     spinner.succeed()
+
+def convert_columns(df, from_type, to_type):
+    cols = list(df.select_dtypes(include=from_type))
+    df[cols] = df[cols].astype(to_type)
+    return df
 
 # %%
 # NOTE: https://github.com/microsoft/vscode-jupyter/issues/1837
