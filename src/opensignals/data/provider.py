@@ -204,7 +204,7 @@ class Provider(ABC):
         start_date = dt.datetime.strptime(start, '%Y-%m-%d')
         end_date = dt.datetime.combine(dt.date.today(), dt.time())
 
-        pbar = tqdm(total=len(tickers), unit='tickers')
+        pbar = tqdm(total=len(tickers), unit='tickers', desc='Open Signals Ticker Download')
 
         dfs = {}
         with futures.ThreadPoolExecutor() as executor:
