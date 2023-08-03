@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from docopt import docopt
+import pandas as pd
 
 from opensignals import __version__
 from opensignals.data.yahoo import Yahoo
@@ -37,6 +38,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         Useful for testing.
 
     """
+    start_t = pd.Timestamp.now()
     args = docopt(__doc__, version=__version__)
 
     if args['--verbose'] and int(args['--verbose']) > 1:
@@ -50,6 +52,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         yahoo = Yahoo()
         yahoo.download_data(Path(args['--dir']), args['--recreate'])
 
+    logging.info(f'Open signals generation took {(pd.Timestamp.now()-start_t).total_seconds()/60:0.2f} minutes.')
 
 if __name__ == '__main__':
     main()
